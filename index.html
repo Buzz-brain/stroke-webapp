@@ -165,7 +165,7 @@ predictButton.addEventListener('click', (e) => {
         smoking_status: form.elements['smoking_status'].value
     };
 
-    fetch('http://127.0.0.1:5000/predict', {
+    fetch('https://stroke-prediction-nhcf.onrender.com/predict', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
