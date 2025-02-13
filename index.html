@@ -1,12 +1,20 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stroke Prediction Model</title>
-    <style>
- @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+    <title>Stroke Risk Assessment Tool</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://ai-public.creatie.ai/gen_page/tailwind-custom.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+    <script
+        src="https://cdn.tailwindcss.com/3.4.5?plugins=forms@0.5.7,typography@0.5.13,aspect-ratio@0.4.2,container-queries@0.1.1"></script>
+    <script src="https://ai-public.creatie.ai/gen_page/tailwind-config.min.js" data-color="#000000"
+        data-border-radius="small"></script>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
 * {
     margin: 0;
@@ -14,192 +22,412 @@
     box-sizing: border-box;
     font-family: "Poppins", sans-serif;
 }
-body {
-    background-color: #3e8e41;
-
-}
-.container {
-    max-width: 800px;
-    margin: 40px auto;
-    border-radius: 20px;
-    padding: 20px;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            .text-green-600 {
+  color: #34C759;
 }
 
-.title {
-    text-align: center;
-    margin-bottom: 20px;
+.text-red-600 {
+  color: #FF3737;
+}
+#result-modal {
+  position: fixed;
+  top: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: top 0.5s ease-in-out;
+  z-index: 1000;
 }
 
-.form-group {
-    margin-bottom: 20px;
+#result-modal.show {
+  top: 10%;
 }
 
-.form-group label {
-    display: block;
-    margin-bottom: 10px;
-}
 
-.form-group input[type="number"],
-.form-group select {
-    width: 100%;
-    height: 40px;
-    padding: 10px;
-    border: 1px solid #ccc;
-}
-    #predict-button {
-        background-color: #4CAF50;
-        color: #fff;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        }
-        
-        #predict-button:hover {
-        background-color: #3e8e41;
-        }
-        
-        .prediction-results {
-        position: fixed;
-        top: 0;
-        right: 0;
-        background-color: #4CAF50;
-        color: #fff;
-        padding: 10px;
-        border-radius: 5px;
-        }
-        
-        .prediction-results::before {
-        content: "Result: ";
-        font-weight: bold;
-        }
-        
-    </style>
+
+
+        </style>
 </head>
-<body>
-    <div class="container">
-        <h1 class="title">Stroke Prediction Model</h1>
-        <form id="prediction-form">
-            <div class="form-group">
-                <label for="gender">Gender:</label>
-                <select id="gender" name="gender">
-                    <option value="1">Male</option>
-                    <option value="0">Female</option>
-                </select>
+
+<body class="bg-gray-50 min-h-screen">
+    <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-blue-900 mb-4">
+                <i class="fas fa-heartbeat text-red-600 mr-3"></i>
+                Stroke Risk Assessment Tool
+            </h1>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                Complete the assessment to understand your stroke risk factors and receive personalized recommendations
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow-sm p-8">
+                    <div class="mb-8">
+                        <div class="relative w-full h-2 bg-gray-200 rounded">
+                            <div class="absolute left-0 top-0 h-2 bg-green-600 rounded" style="width: 100%"></div>
+                        </div>
+                        <div class="flex justify-between mt-2 text-sm text-blue-600">
+                            <span>Personal Info</span>
+                            <span>Medical History</span>
+                            <span>Lifestyle</span>
+                            <span>Results</span>
+                        </div>
+                    </div>
+
+                    <form id="prediction-form" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="relative">
+                                <label class="block text-sm font-medium text-gray-700 mb-2" for="gender">Gender</label>
+                                <div class="relative">
+                                    <select id="gender" name="gender"
+                                        class="block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-custom focus:border-custom rounded-md !rounded-button">
+                                        <option value="" disabled>Select gender</option>
+                                        <option value="1">Male</option>
+                                        <option value="0">Female</option>
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <i class="fas fa-chevron-down text-blue-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="relative">
+                                <label class="block text-sm font-medium text-gray-700 mb-2" for="age">Age</label>
+                                <div class="relative">
+                                    <input type="number" id="age" name="age"
+                                        class="block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-custom focus:border-custom rounded-md !rounded-button"
+                                        placeholder="Enter your age">
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <i class="fas fa-calendar text-blue-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="relative">
+                                <label for="hypertension"
+                                    class="block text-sm font-medium text-gray-700 mb-2">Hypertension</label>
+                                <div class="relative">
+                                    <select id="hypertension" name="hypertension"
+                                        class="block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-custom focus:border-custom rounded-md !rounded-button">
+                                        <option value="" disabled>Select status</option>
+                                        <option value="1">Yes</option>
+                                        <option value="0">No</option>
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <i class="fas fa-heartbeat text-blue-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="relative">
+                                <label for="heart_disease" class="block text-sm font-medium text-gray-700 mb-2">Heart
+                                    Disease
+                                </label>
+                                <div class="relative">
+                                    <select id="heart_disease" name="heart_disease"
+                                        class="block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-custom focus:border-custom rounded-md !rounded-button">
+                                        <option value="" disabled>Select status</option>
+                                        <option value="1">Yes</option>
+                                        <option value="0">No</option>
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <i class="fas fa-heart text-blue-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <label for="ever_married" class="block text-sm font-medium text-gray-700 mb-2">Ever
+                                    Married
+                                </label>
+                                <div class="relative">
+                                    <select id="ever_married" name="ever_married"
+                                        class="block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-custom focus:border-custom rounded-md !rounded-button">
+                                        <option value="" disabled>Select status</option>
+                                        <option value="1">Yes</option>
+                                        <option value="0">No</option>
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <i class="fas fa-users text-blue-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <label for="work_type" class="block text-sm font-medium text-gray-700 mb-2">Work Type
+                                </label>
+                                <div class="relative">
+                                    <select id="work_type" name="work_type"
+                                        class="block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-custom focus:border-custom rounded-md !rounded-button">
+                                        <option value="0">Private</option>
+                                        <option value="1">Self-employed</option>
+                                        <option value="2">Govt_job</option>
+                                        <option value="3">Never_worked</option>
+                                        <option value="4">Children</option>
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <i class="fas fa-running text-blue-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Residence Type
+                                </label>
+                                <div class="relative">
+                                    <select id="Residence_type" name="Residence_type"
+                                        class="block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-custom focus:border-custom rounded-md !rounded-button">
+                                        <option value="" disabled>Select status</option>
+                                        <option value="1">Urban</option>
+                                        <option value="0">Rural</option>
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <i class="fas fa-notes-medical text-blue-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <label for="avg_glucose_level"
+                                    class="block text-sm font-medium text-gray-700 mb-2">Avergae Glucose Level
+                                </label>
+                                <div class="relative">
+                                    <input type="number" id="avg_glucose_level" name="avg_glucose_level"
+                                        class="block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-custom focus:border-custom rounded-md !rounded-button">
+                                     
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <i class="fas fa-flask text-blue-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="relative">
+                                <label for="bmi" class="block text-sm font-medium text-gray-700 mb-2">BMI</label>
+                                <div class="relative">
+                                    <input type="number" step="0.1" id="bmi" name="bmi"
+                                        class="block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-custom focus:border-custom rounded-md !rounded-button"
+                                        placeholder="Enter your BMI">
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <i class="fas fa-weight text-blue-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="relative">
+                                <label for="smoking_status" class="block text-sm font-medium text-gray-700 mb-2">Smoking
+                                    Status</label>
+                                <div class="relative">
+                                    <select id="smoking_status" name="smoking_status"
+                                        class="block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-custom focus:border-custom rounded-md !rounded-button">
+                                        <option value="" disabled>Select status</option>
+                                        <option value="0">Smokes</option>
+                                        <option value="1">Never smoked</option>
+                                        <option value="2">Formerly smoked</option>
+
+
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <i class="fas fa-smoking text-blue-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end space-x-4 pt-6">
+                            <a href="/index.html"><button type="button"
+                                class="px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-custom !rounded-button">
+                                Reset Form
+                            </button></a>
+                            <button id="predict-button"
+                                class="px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-900 hover:bg-custom/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-custom !rounded-button">
+                                Calculate Risk
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="age">Age:</label>
-                <input type="number" id="age" name="age">
+
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-sm p-8">
+                    <h3 class="text-lg font-semibold text-blue-900 mb-4">
+                        <i class="fas fa-info-circle text-custom mr-2"></i>
+                        Quick Facts
+                    </h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                            <span class="text-gray-600">Stroke is a leading cause of disability worldwide</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                            <span class="text-gray-600">80% of strokes are preventable through lifestyle changes</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                            <span class="text-gray-600">Regular exercise can reduce stroke risk by up to 27%</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                            <span class="text-gray-600">High blood pressure is the biggest controllable risk
+                                factor</span>
+                        </li>
+                    </ul>
+
+                    <div class="mt-8 pt-8 border-t border-gray-200">
+                        <h3 class="text-lg font-semibold text-blue-900 mb-4">
+                            <i class="fas fa-shield-alt text-custom mr-2"></i>
+                            Prevention Tips
+                        </h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start">
+                                <i class="fas fa-arrow-right text-blue-500 mt-1 mr-3"></i>
+                                <span class="text-gray-600">Monitor blood pressure regularly</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-arrow-right text-blue-500 mt-1 mr-3"></i>
+                                <span class="text-gray-600">Maintain a healthy diet rich in fruits and vegetables</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-arrow-right text-blue-500 mt-1 mr-3"></i>
+                                <span class="text-gray-600">Exercise for at least 30 minutes daily</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-arrow-right text-blue-500 mt-1 mr-3"></i>
+                                <span class="text-gray-600">Quit smoking and limit alcohol consumption</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="hypertension">Hypertension:</label>
-                <select id="hypertension" name="hypertension">
-                    <option value="1">Yes</option>
-                    <option value="0">No</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="heart_disease">Heart Disease:</label>
-                <select id="heart_disease" name="heart_disease">
-                    <option value="1">Yes</option>
-                    <option value="0">No</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="ever_married">Ever Married:</label>
-                <select id="ever_married" name="ever_married">
-                    <option value="1">Yes</option>
-                    <option value="0">No</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="work_type">Work Type:</label>
-                <select id="work_type" name="work_type">
-                    <option value="12">Private</option>
-                    <option value="11">Self-employed</option>
-                    <option value="10">Govt_job</option>
-                    <option value="9">Never_worked</option>
-                    <option value="8">Children</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="Residence_type">Residence Type:</label>
-                <select id="Residence_type" name="Residence_type">
-                    <option value="1">Urban</option>
-                    <option value="0">Rural</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="avg_glucose_level">Average Glucose Level:</label>
-                <input type="number" id="avg_glucose_level" name="avg_glucose_level">
-            </div>
-            <div class="form-group">
-                <label for="bmi">BMI:</label>
-                <input type="number" id="bmi" name="bmi">
-            </div>
-            <div class="form-group">
-                <label for="smoking_status">Smoking Status:</label>
-                <select id="smoking_status" name="smoking_status">
-                    <option value="1">Smokes</option>
-                    <option value="0">Never smoked</option>
-                    <option value="2">Formerly smoked</option>
-                </select>
-            </div>
-            <button id="predict-button">Predict</button>
-        </form>
-        <div id="prediction-results" class="prediction-results"></div>
+
+            <div class="lg:col-span-2 mt-8" id="result-modal" style="width: 70%; border-radius: 20px; box-shadow: 1px 1px 30px grey;">
+                <div class="bg-white rounded-lg shadow-sm p-8 relative">
+                    <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-900" id="close-modal">
+                        <i class="fas fa-times"></i>
+                      </button>
+                  
+                  <h3 class="text-xl font-semibold text-blue-900 mb-6"><i class="fas fa-chart-bar text-custom mr-2"></i>Assessment Results</h3>
+                  <div class="grid grid-cols-1 md:grid-cols-1 gap-6">
+                    <div class="bg-gray-50 rounded-lg p-6" id="resbg">
+                      <h4 class="text-lg font-medium text-blue-900 mb-2">Congestion Level</h4>
+                      <div class="text-3xl font-bold text-custom" id="congestion-level" class="congestion-level">No Result </div>
+                      <p class="text-sm text-gray-600 mt-2">Based on current assessment</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-6">
+                      <h4 class="text-lg font-medium text-blue-900 mb-2">Recommendations</h4>
+                      <ul class="text-sm text-blue-600 space-y-2" id="recommendation-list"></ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+        </div>
     </div>
 
-   <script>
-    const form = document.getElementById('prediction-form');
-const predictButton = document.getElementById('predict-button');
-const predictionResults = document.getElementById('prediction-results');
+<script>
+      const form = document.getElementById('prediction-form');
+      const predictButton = document.getElementById('predict-button');
+      const congestionLevelElement = document.getElementById('congestion-level');
+      const recommendationList = document.getElementById('recommendation-list');
+      const resbg = document.getElementById('resbg');
 
-predictButton.addEventListener('click', (e) => {
-    e.preventDefault();
-    const inputData = {
-        gender: form.elements['gender'].value,
-        age: form.elements['age'].value,
-        hypertension: form.elements['hypertension'].value,
-        heart_disease: form.elements['heart_disease'].value,
-        ever_married: form.elements['ever_married'].value,
-        work_type: form.elements['work_type'].value,
-        Residence_type: form.elements['Residence_type'].value,
-        avg_glucose_level: form.elements['avg_glucose_level'].value,
-        bmi: form.elements['bmi'].value,
-        smoking_status: form.elements['smoking_status'].value
-    };
+      const closeModal = document.getElementById('close-modal');
+const resultModal = document.getElementById('result-modal');
 
-    fetch('https://stroke-prediction-nhcf.onrender.com/predict', {
-        method: 'POST',
-        headers: {
+
+
+      predictButton.addEventListener('click', (e) => {
+        e.preventDefault();
+    
+        // Get input values
+        const inputData = {
+          gender: form.elements['gender'].value,
+          age: form.elements['age'].value,
+          hypertension: form.elements['hypertension'].value,
+          heart_disease: form.elements['heart_disease'].value,
+          ever_married: form.elements['ever_married'].value,
+          work_type: form.elements['work_type'].value,
+          Residence_type: form.elements['Residence_type'].value,
+          avg_glucose_level: form.elements['avg_glucose_level'].value,
+          bmi: "2322.7",
+          smoking_status: form.elements['smoking_status'].value
+        };
+    
+        // Validate input values
+        const requiredFields = [
+          'gender',
+          'age',
+          'hypertension',
+          'heart_disease',
+          'ever_married',
+          'work_type',
+          'Residence_type',
+          'avg_glucose_level',
+          'bmi',
+          'smoking_status'
+        ];
+    
+        for (const field of requiredFields) {
+          if (!inputData[field] || inputData[field].trim() === '') {
+            alert(`Please fill in the ${field} field.`);
+            return;
+          }
+        }
+    
+        // Make API request
+        fetch('https://stroke-prediction-nhcf.onrender.com/predict', {
+          method: 'POST',
+          headers: {
             'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(inputData)
-    })
-    .then(response => {
-        if (!response.ok) {
+          },
+          body: JSON.stringify(inputData)
+        })
+        .then(response => {
+          if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        const prediction = data.predictions[0];
-        if (prediction === 1) {
-            predictionResults.innerHTML = 'High risk of stroke';
-        } else {
-            predictionResults.innerHTML = 'Low risk of stroke';
-        }
-    })
-    .catch(error => console.error('Error:', error));
+          }
+          return response.json();
+        })
+        .then(data => {
+          const prediction = data.predictions[0];
+          if (prediction === 1) {
+      congestionLevelElement.innerHTML = 'High Congestion';
+      congestionLevelElement.classList.remove('text-green-600');
+      congestionLevelElement.classList.add('text-red-600');
+      resbg.classList.add('bg-red-50');
+
+      recommendationList.innerHTML = `
+        <li>• Seek immediate medical consultation</li>
+        <li>• Reduce stress levels urgently</li>
+        <li>• Start blood pressure medication if prescribed</li>
+        <li>• Make immediate lifestyle changes</li>
+        <li>• Schedule regular monitoring</li>
+      `;
+    } else {
+      congestionLevelElement.innerHTML = 'Low Congestion';
+      congestionLevelElement.classList.remove('text-red-600');
+      congestionLevelElement.classList.add('text-green-600');
+      resbg.classList.add('bg-green-50');
+
+      recommendationList.innerHTML = `
+        <li>• Continue maintaining healthy lifestyle habits</li>
+        <li>• Regular health check-ups</li>
+        <li>• Monitor blood pressure</li>
+      `;
+    }
+    const resultModal = document.getElementById('result-modal');
+    resultModal.classList.add('show');
+resultModal.style.display = 'block';
+
+
+        })
+        .catch(error => console.error('Error:', error));
+      });
+
+      closeModal.addEventListener('click', () => {
+  resultModal.classList.remove('show');
 });
 
-   </script>
+
+    </script>
+    
+    
 </body>
+
 </html>
-
-
-
